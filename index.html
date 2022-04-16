@@ -1,42 +1,139 @@
-<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>計畫區三維建物</title>
-    <style>
-      html,
-      body,
-      #viewDiv {
-        padding: 0;
-        margin: 0;
-        height: 100%;
-        width: 100%;
-      }
-    </style>
-    <link rel="stylesheet" href="https://js.arcgis.com/4.22/esri/themes/light/main.css" />
-    <script src="https://js.arcgis.com/4.22/"></script>
-    <script>
-      require(["esri/Map", "esri/views/SceneView","esri/layers/SceneLayer"], (Map, SceneView,SceneLayer) => {
-        const map = new Map({
-          basemap: "dark-gray-vector",
-          ground: "world-elevation"
-        });
-        const view = new SceneView({
-          container: "viewDiv", // Reference to the scene div created in step 5
-          map: map, // Reference to the map object created before the scene
-          scale: 10000, // Sets the initial scale to 1:50,000,000
-          center: [121.5525424,25.0250296] // Sets the center point of view with lon/lat
-          
-        });
-        const sceneLayer = new SceneLayer({
-          url:"https://i3s.nlsc.gov.tw/building/i3s/SceneServer/layers/0"
-        });
-        map.add(sceneLayer);
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="計畫區三維建物圖" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>計畫區三維建物圖</title>
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.23/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.23/"></script>
+
+  <script>
+    require(["esri/Map",
+      "esri/views/SceneView",
+      "esri/layers/SceneLayer",
+      "esri/widgets/Expand",
+      "esri/widgets/Weather",
+      "esri/widgets/Daylight",
+      "esri/widgets/Track",
+      "esri/layers/GroupLayer",
+      "esri/widgets/LayerList",
+      "esri/widgets/Search",
+      "esri/widgets/BasemapGallery"], (
+        Map,
+        SceneView,
+        SceneLayer,
+        Expand,
+        Weather,
+        Daylight,
+        Track,
+        GroupLayer,
+        LayerList,
+        Search,
+        BasemapGallery
+      ) => {
+      const map = new Map({
+        basemap: "dark-gray-vector",
+        ground: "world-elevation"
       });
-    </script>
-  </head>
-  <body>
-    <div id="viewDiv"></div>
-  </body>
+      const view = new SceneView({
+        container: "viewDiv",
+        map: map,
+        camera: {
+          position: [121.5525424, 25.0250296, 707],
+          tilt: 81,
+          heading: 50
+        },
+        qualityProfile: "high",
+        environment: {
+          atmosphere: {
+            quality: "high"
+          },
+          weather: { type: "cloudy", cloudCover: 0.6 }
+        }
+      });
+      const 台北市 = new SceneLayer({
+        url: "https://i3s.nlsc.gov.tw/building/i3s/SceneServer/layers/0",
+        title: "臺北市",
+        popupEnabled: false
+      });
+      const 台中市 = new SceneLayer({
+        url: "https://i3s.nlsc.gov.tw/building/i3s/SceneServer/layers/1",
+        title: "臺中市",
+        popupEnabled: false
+      });
+      const 台東縣 = new SceneLayer({
+        url: "https://i3s.nlsc.gov.tw/building/i3s/SceneServer/layers/18",
+        title: "臺東縣",
+        popupEnabled: false
+      });
+      const weatherExpand = new Expand({
+        view: view,
+        content: new Weather({
+          view: view
+        }),
+        group: "top-right",
+      });
+      const daylightExpand = new Expand({
+        view: view,
+        content: new Daylight({
+          view: view
+        }),
+        group: "top-right"
+      });
+      view.ui.add([weatherExpand, daylightExpand], "top-right");
+      var track = new Track({
+        view: view
+      });
+      view.ui.add(track, "top-left");
+      var layerList = new LayerList({
+        view: view
+      });
+      layerListExpand = new Expand({
+        expandIconClass: "esri-icon-layer-list",
+        view: view,
+        content: layerList
+      });
+      const searchWidget = new Search({
+        view: view
+      });
+      searchexpand = new Expand({
+        expandIconClass: "esri-icon-search",
+        view: view,
+        content: searchWidget
+      });
+      const basemapGallery = new BasemapGallery({
+        view: view,
+        container: document.createElement("div")
+      });
+
+      const bgExpand = new Expand({
+        view: view,
+        content: basemapGallery
+      });
+      view.ui.add(bgExpand, "top-right");
+      view.ui.add([layerListExpand, searchexpand], "top-right");
+      map.add(台中市);
+      map.add(台北市);
+      map.add(台東縣);
+      
+    });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+</body>
+
 </html>
+
